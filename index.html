@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Editor Pro</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #232526 0%, #414345 100%);
+            min-height: 100vh;
+            color: #f1f1f1;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #fff;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.6);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.85;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 20px;
+            background: #181a1b;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            overflow: hidden;
+        }
+
+        .video-section {
+            padding: 20px;
+        }
+
+        .video-container {
+            position: relative;
+            background: #111;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        #videoPlayer {
+            width: 100%;
+            height: 400px;
+            background: #111;
+            border-radius: 10px;
+        }
+
+        .upload-area {
+            border: 3px dashed #444a5a;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            background: #232526;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            color: #bfc7d5;
+        }
+
+        .upload-area:hover {
+            border-color: #667eea;
+            background: #23263a;
+        }
+
+        .upload-area.dragover {
+            border-color: #764ba2;
+            background: #23263a;
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #23263a;
+            color: #bfc7d5;
+            border: 1px solid #444a5a;
+        }
+
+        .btn-secondary:hover {
+            background: #2c2f48;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: #fff;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .timeline {
+            background: #232526;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .timeline-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            color: #bfc7d5;
+        }
+
+        .timeline-track {
+            background: #181a1b;
+            border-radius: 8px;
+            height: 60px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .timeline-cursor {
+            position: absolute;
+            top: 0;
+            width: 2px;
+            height: 100%;
+            background: #dc3545;
+            z-index: 10;
+            transition: left 0.1s ease;
+        }
+
+        .timeline-clip {
+            position: absolute;
+            top: 5px;
+            height: 50px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            opacity: 0.85;
+        }
+
+        .timeline-clip:hover {
+            transform: scaleY(1.1);
+            opacity: 1;
+        }
+
+        .sidebar {
+            background: #181a1b;
+            padding: 20px;
+            border-left: 1px solid #232526;
+        }
+
+        .sidebar h3 {
+            margin-bottom: 15px;
+            color: #fff;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 8px;
+        }
+
+        .effect-group {
+            margin-bottom: 20px;
+        }
+
+        .effect-item {
+            background: #232526;
+            border: 1px solid #444a5a;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #bfc7d5;
+        }
+
+        .effect-item:hover {
+            border-color: #667eea;
+            background: #2c2f48;
+            color: #fff;
+        }
+
+        .effect-item.active {
+            border-color: #667eea;
+            background: #23263a;
+            color: #fff;
+        }
+
+        .slider-group {
+            margin-bottom: 15px;
+        }
+
+        .slider-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #bfc7d5;
+        }
+
+        .slider {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: #444a5a;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+        }
+
+        .slider::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            border: none;
+        }
+
+        .time-display {
+            font-family: monospace;
+            font-size: 1.1rem;
+            color: #bfc7d5;
+            text-align: center;
+            margin: 10px 0;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #232526;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            transition: width 0.1s ease;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .controls {
+                justify-content: center;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+
+        /* Bottom timeline styles */
+        .bottom-timeline {
+            position: fixed;
+            left: 0;
+            bottom: 0;
+            width: 100vw;
+            background: #232526;
+            z-index: 100;
+            box-shadow: 0 -4px 24px rgba(0,0,0,0.5);
+            padding: 0 0 10px 0;
+        }
+        .bottom-timeline .timeline {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: #232526;
+            border-radius: 10px 10px 0 0;
+            padding: 20px 30px 10px 30px;
+            margin-bottom: 0;
+        }
+        .bottom-timeline .timeline-header {
+            color: #bfc7d5;
+        }
+        @media (max-width: 768px) {
+            .bottom-timeline .timeline {
+                padding: 10px 5px 5px 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎬 Video Editor Pro</h1>
+            <p>Professional video editing in your browser</p>
+        </div>
+
+        <div class="main-content">
+            <div class="video-section">
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">📁</div>
+                    <h3>Upload Video</h3>
+                    <p>Drag and drop your video file here or click to browse</p>
+                    <input type="file" id="fileInput" accept="video/*" style="display: none;">
+                </div>
+
+                <div class="video-container hidden" id="videoContainer">
+                    <video id="videoPlayer" controls>
+                        Your browser does not support the video tag.
+                    </video>
+                </div>
+
+                <div class="controls">
+                    <button class="btn btn-primary" id="playBtn">
+                        <span>▶️</span> Play
+                    </button>
+                    <button class="btn btn-secondary" id="pauseBtn">
+                        <span>⏸️</span> Pause
+                    </button>
+                    <button class="btn btn-secondary" id="stopBtn">
+                        <span>⏹️</span> Stop
+                    </button>
+                    <button class="btn btn-secondary" id="cutBtn">
+                        <span>✂️</span> Cut
+                    </button>
+                    <button class="btn btn-secondary" id="trimBtn">
+                        <span>🔪</span> Trim
+                    </button>
+                    <button class="btn btn-danger" id="resetBtn">
+                        <span>🔄</span> Reset
+                    </button>
+                </div>
+
+                <div class="time-display">
+                    <span id="currentTime">00:00</span> / <span id="totalTime">00:00</span>
+                </div>
+
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+            </div>
+
+            <div class="sidebar">
+                <h3>🎨 Effects & Filters</h3>
+                
+                <div class="effect-group">
+                    <h4>Brightness & Contrast</h4>
+                    <div class="slider-group">
+                        <label for="brightness">Brightness</label>
+                        <input type="range" id="brightness" class="slider" min="0" max="200" value="100">
+                    </div>
+                    <div class="slider-group">
+                        <label for="contrast">Contrast</label>
+                        <input type="range" id="contrast" class="slider" min="0" max="200" value="100">
+                    </div>
+                </div>
+
+                <div class="effect-group">
+                    <h4>Color Adjustments</h4>
+                    <div class="slider-group">
+                        <label for="saturation">Saturation</label>
+                        <input type="range" id="saturation" class="slider" min="0" max="200" value="100">
+                    </div>
+                    <div class="slider-group">
+                        <label for="hue">Hue</label>
+                        <input type="range" id="hue" class="slider" min="0" max="360" value="0">
+                    </div>
+                </div>
+
+                <div class="effect-group">
+                    <h4>Blur & Sharpness</h4>
+                    <div class="slider-group">
+                        <label for="blur">Blur</label>
+                        <input type="range" id="blur" class="slider" min="0" max="10" value="0">
+                    </div>
+                </div>
+
+                <div class="effect-group">
+                    <h4>Quick Effects</h4>
+                    <div class="effect-item" data-effect="grayscale">Grayscale</div>
+                    <div class="effect-item" data-effect="sepia">Sepia</div>
+                    <div class="effect-item" data-effect="invert">Invert</div>
+                    <div class="effect-item" data-effect="vintage">Vintage</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Timeline -->
+        <div class="bottom-timeline">
+            <div class="timeline">
+                <div class="timeline-header">
+                    <h3>Timeline</h3>
+                    <span id="timelineTime">00:00</span>
+                </div>
+                <div class="timeline-track" id="timelineTrack">
+                    <div class="timeline-cursor" id="timelineCursor"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class VideoEditor {
+            constructor() {
+                this.video = document.getElementById('videoPlayer');
+                this.uploadArea = document.getElementById('uploadArea');
+                this.videoContainer = document.getElementById('videoContainer');
+                this.fileInput = document.getElementById('fileInput');
+                this.timelineTrack = document.getElementById('timelineTrack');
+                this.timelineCursor = document.getElementById('timelineCursor');
+                this.progressFill = document.getElementById('progressFill');
+                
+                this.currentTime = document.getElementById('currentTime');
+                this.totalTime = document.getElementById('totalTime');
+                this.timelineTime = document.getElementById('timelineTime');
+                
+                this.isPlaying = false;
+                this.clips = [];
+                this.currentClip = null;
+                
+                this.initializeEventListeners();
+                this.initializeEffects();
+            }
+
+            initializeEventListeners() {
+                // File upload
+                this.uploadArea.addEventListener('click', () => this.fileInput.click());
+                this.uploadArea.addEventListener('dragover', this.handleDragOver.bind(this));
+                this.uploadArea.addEventListener('drop', this.handleDrop.bind(this));
+                this.fileInput.addEventListener('change', this.handleFileSelect.bind(this));
+
+                // Video controls
+                this.video.addEventListener('loadedmetadata', this.onVideoLoaded.bind(this));
+                this.video.addEventListener('timeupdate', this.onTimeUpdate.bind(this));
+                this.video.addEventListener('ended', this.onVideoEnded.bind(this));
+
+                // Control buttons
+                document.getElementById('playBtn').addEventListener('click', this.play.bind(this));
+                document.getElementById('pauseBtn').addEventListener('click', this.pause.bind(this));
+                document.getElementById('stopBtn').addEventListener('click', this.stop.bind(this));
+                document.getElementById('cutBtn').addEventListener('click', this.cut.bind(this));
+                document.getElementById('trimBtn').addEventListener('click', this.trim.bind(this));
+                document.getElementById('resetBtn').addEventListener('click', this.reset.bind(this));
+
+                // Timeline
+                this.timelineTrack.addEventListener('click', this.onTimelineClick.bind(this));
+
+                // Effects
+                document.querySelectorAll('.effect-item').forEach(item => {
+                    item.addEventListener('click', this.applyQuickEffect.bind(this));
+                });
+            }
+
+            initializeEffects() {
+                const sliders = ['brightness', 'contrast', 'saturation', 'hue', 'blur'];
+                sliders.forEach(sliderId => {
+                    const slider = document.getElementById(sliderId);
+                    slider.addEventListener('input', this.applyFilter.bind(this));
+                });
+            }
+
+            handleDragOver(e) {
+                e.preventDefault();
+                this.uploadArea.classList.add('dragover');
+            }
+
+            handleDrop(e) {
+                e.preventDefault();
+                this.uploadArea.classList.remove('dragover');
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    this.loadVideo(files[0]);
+                }
+            }
+
+            handleFileSelect(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    this.loadVideo(file);
+                }
+            }
+
+            loadVideo(file) {
+                const url = URL.createObjectURL(file);
+                this.video.src = url;
+                this.uploadArea.classList.add('hidden');
+                this.videoContainer.classList.remove('hidden');
+                
+                // Create initial clip
+                this.clips = [{
+                    id: Date.now(),
+                    start: 0,
+                    end: 0,
+                    source: url
+                }];
+            }
+
+            onVideoLoaded() {
+                const duration = this.video.duration;
+                this.totalTime.textContent = this.formatTime(duration);
+                this.timelineTime.textContent = this.formatTime(duration);
+                
+                // Update initial clip end time
+                if (this.clips.length > 0) {
+                    this.clips[0].end = duration;
+                }
+                
+                this.updateTimeline();
+            }
+
+            onTimeUpdate() {
+                const current = this.video.currentTime;
+                const duration = this.video.duration;
+                
+                this.currentTime.textContent = this.formatTime(current);
+                
+                // Update progress bar
+                const progress = (current / duration) * 100;
+                this.progressFill.style.width = `${progress}%`;
+                
+                // Update timeline cursor
+                const cursorPosition = (current / duration) * 100;
+                this.timelineCursor.style.left = `${cursorPosition}%`;
+            }
+
+            onVideoEnded() {
+                this.isPlaying = false;
+                this.updatePlayButton();
+            }
+
+            onTimelineClick(e) {
+                const rect = this.timelineTrack.getBoundingClientRect();
+                const clickX = e.clientX - rect.left;
+                const percentage = (clickX / rect.width) * 100;
+                const newTime = (percentage / 100) * this.video.duration;
+                
+                this.video.currentTime = newTime;
+            }
+
+            play() {
+                this.video.play();
+                this.isPlaying = true;
+                this.updatePlayButton();
+            }
+
+            pause() {
+                this.video.pause();
+                this.isPlaying = false;
+                this.updatePlayButton();
+            }
+
+            stop() {
+                this.video.pause();
+                this.video.currentTime = 0;
+                this.isPlaying = false;
+                this.updatePlayButton();
+            }
+
+            cut() {
+                const currentTime = this.video.currentTime;
+                const duration = this.video.duration;
+                
+                // Create new clip from current time to end
+                const newClip = {
+                    id: Date.now(),
+                    start: currentTime,
+                    end: duration,
+                    source: this.video.src
+                };
+                
+                // Update current clip end time
+                if (this.clips.length > 0) {
+                    this.clips[this.clips.length - 1].end = currentTime;
+                }
+                
+                this.clips.push(newClip);
+                this.updateTimeline();
+                
+                alert(`Video cut at ${this.formatTime(currentTime)}`);
+            }
+
+            trim() {
+                const currentTime = this.video.currentTime;
+                const duration = this.video.duration;
+                
+                // Simple trim: remove everything after current time
+                if (this.clips.length > 0) {
+                    this.clips[this.clips.length - 1].end = currentTime;
+                }
+                
+                this.updateTimeline();
+                alert(`Video trimmed to ${this.formatTime(currentTime)}`);
+            }
+
+            reset() {
+                this.video.pause();
+                this.video.currentTime = 0;
+                this.isPlaying = false;
+                this.updatePlayButton();
+                
+                // Reset effects
+                this.resetEffects();
+                
+                alert('Video reset to beginning');
+            }
+
+            updatePlayButton() {
+                const playBtn = document.getElementById('playBtn');
+                if (this.isPlaying) {
+                    playBtn.innerHTML = '<span>⏸️</span> Pause';
+                } else {
+                    playBtn.innerHTML = '<span>▶️</span> Play';
+                }
+            }
+
+            updateTimeline() {
+                this.timelineTrack.innerHTML = '<div class="timeline-cursor" id="timelineCursor"></div>';
+                this.timelineCursor = document.getElementById('timelineCursor');
+                
+                this.clips.forEach(clip => {
+                    const clipElement = document.createElement('div');
+                    clipElement.className = 'timeline-clip';
+                    clipElement.style.left = `${(clip.start / this.video.duration) * 100}%`;
+                    clipElement.style.width = `${((clip.end - clip.start) / this.video.duration) * 100}%`;
+                    clipElement.title = `${this.formatTime(clip.start)} - ${this.formatTime(clip.end)}`;
+                    
+                    this.timelineTrack.appendChild(clipElement);
+                });
+            }
+
+            applyFilter() {
+                const brightness = document.getElementById('brightness').value;
+                const contrast = document.getElementById('contrast').value;
+                const saturation = document.getElementById('saturation').value;
+                const hue = document.getElementById('hue').value;
+                const blur = document.getElementById('blur').value;
+                
+                const filter = `
+                    brightness(${brightness}%) 
+                    contrast(${contrast}%) 
+                    saturate(${saturation}%) 
+                    hue-rotate(${hue}deg) 
+                    blur(${blur}px)
+                `;
+                
+                this.video.style.filter = filter;
+            }
+
+            applyQuickEffect(e) {
+                const effect = e.target.dataset.effect;
+                
+                // Remove active class from all effects
+                document.querySelectorAll('.effect-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+                
+                // Add active class to clicked effect
+                e.target.classList.add('active');
+                
+                // Apply effect
+                switch(effect) {
+                    case 'grayscale':
+                        this.video.style.filter = 'grayscale(100%)';
+                        break;
+                    case 'sepia':
+                        this.video.style.filter = 'sepia(100%)';
+                        break;
+                    case 'invert':
+                        this.video.style.filter = 'invert(100%)';
+                        break;
+                    case 'vintage':
+                        this.video.style.filter = 'sepia(50%) contrast(120%) brightness(90%)';
+                        break;
+                }
+            }
+
+            resetEffects() {
+                this.video.style.filter = 'none';
+                
+                // Reset sliders
+                ['brightness', 'contrast', 'saturation', 'hue', 'blur'].forEach(id => {
+                    const slider = document.getElementById(id);
+                    if (id === 'brightness' || id === 'contrast' || id === 'saturation') {
+                        slider.value = 100;
+                    } else if (id === 'hue') {
+                        slider.value = 0;
+                    } else if (id === 'blur') {
+                        slider.value = 0;
+                    }
+                });
+                
+                // Remove active effects
+                document.querySelectorAll('.effect-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+            }
+
+            formatTime(seconds) {
+                const mins = Math.floor(seconds / 60);
+                const secs = Math.floor(seconds % 60);
+                return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            }
+        }
+
+        // Initialize the video editor when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new VideoEditor();
+        });
+    </script>
+</body>
+</html>
